@@ -9,6 +9,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -75,6 +76,7 @@ private fun StatisticsCard() // функция для отображения н�
             IconCard(iconId = R.drawable.ic_outline_reply_24, text = "7")
             IconCard(iconId = R.drawable.ic_outline_mode_comment_24, text = "8")
             IconCard(iconId = R.drawable.ic_baseline_favorite_border_24, text = "23")
+            // Icon(Icons.Default.Star,contentDescription = null) - так выбирается иконка из предустановленных
         }
     }
 }
@@ -141,7 +143,7 @@ private fun OneCard() {
             )
         }
         Icon(
-            imageVector = Icons.Rounded.MoreVert, // Иконку подтягивать в проект не надо, просто прописать так
+            imageVector = Icons.Rounded.MoreVert, // Именно здесь: иконку подтягивать в проект не надо, просто прописать так
             contentDescription = "image2",
             tint = MaterialTheme.colors.onSecondary  // меняю цвет иконки
         )
