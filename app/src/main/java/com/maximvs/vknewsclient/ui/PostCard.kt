@@ -2,6 +2,7 @@ package com.maximvs.vknewsclient.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
@@ -22,30 +23,41 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.maximvs.vknewsclient.R
+import com.maximvs.vknewsclient.domain.FeedPost
+import com.maximvs.vknewsclient.domain.StatisticItem
+import com.maximvs.vknewsclient.domain.StatisticType
 import com.maximvs.vknewsclient.ui.theme.VkNewsClientTheme
 
 
 @Composable
-fun PostCard() {
-    Card {
+fun PostCard(
+    modifier: Modifier = Modifier, // Чтобы можно было добавлять паддинг и пр. при вызове PostCard из вне и...
+    feedPost: FeedPost,  // Вторым параметром принимает feedPost и из него можно взять статистику:
+    // StatisticsCard(statistics = feedPost.statistics) - см.ниже
+    onStatisticItemClickListener: (StatisticItem) -> Unit  // См.конспект 4.4, ближе к концу
+) {
+    Card(
+        modifier = modifier  //  ...здесь - тоже. См.конспект, 4.4
+    ) {
         Column(
             modifier = Modifier //добавляю атрибут modifier, чтобы установить размер
                 .padding(8.dp)  // отступ со всех сторон
         ) {
-            OneCard()
+            OneCard(feedPost) // Передаю объект feedPost
             Spacer( // Элемент Spacer - делает зазор
                 modifier = Modifier
                     .height(8.dp)
             )
-            Text(text = stringResource(R.string.one_text))
+            Text(text = feedPost.contentText)  // Текст беру из feedPost
             Spacer( // Элемент Spacer - делает зазор
                 modifier = Modifier
                     .height(8.dp)
             )
             Image(
-                modifier = Modifier //добавляю атрибут modifier, чтобы установить размер
-                    .fillMaxWidth(), // сделал во всю ширину экрана
-                painter = painterResource(id = R.drawable.photo_1),
+                modifier = Modifier    //  добавляю атрибут modifier, чтобы установить размер
+                    .fillMaxWidth()    //  сделал во всю ширину экрана
+                    .height(200.dp),   //  высота картинки, см.4.4
+                painter = painterResource(id = feedPost.contentImageResId),  // Картинку беру из feedPost
                 contentDescription = "image2",
                 contentScale = ContentScale.FillWidth // каринка растянется, сохраняя соотношение сторон
             )
@@ -53,42 +65,90 @@ fun PostCard() {
                 modifier = Modifier
                     .height(8.dp)
             )
-            StatisticsCard()
+            StatisticsCard(
+                statistics = feedPost.statistics,
+                onItemClickListener = onStatisticItemClickListener
+            ) // При вызове функции добавил слушатель, конспект 4.4, ближе к концу
         }
     }
 }
 
 @Composable
-private fun StatisticsCard() // функция для отображения нескольких fun IconCard, в качестве параметров принимает:
-{
+private fun StatisticsCard(  // функция для отображения нескольких fun IconCard, в качестве параметров принимает:
+    statistics: List<StatisticItem>, // коллекцию элементов StatisticItem, назову statistics
+    onItemClickListener: (StatisticItem) -> Unit    // См.конспект 4.4, ближе к концу
+) {
     Row() {
         Row(
             modifier = Modifier
-                .weight(1f) // если у двух элементов делать так - они займут одинаковое расстояние
+                .weight(1f) // Если у двух элементов делать так - они займут одинаковое расстояние
         ) {
-            IconCard(iconId = R.drawable.ic_outline_remove_red_eye_24, text = "966")
+            val viewsItem =
+                statistics.getItemByType(StatisticType.VIEWS) // Создаю переменную (val viewsItem) и в нее кладу полученный здесь же (методом getItemByType) нужный элемент коллекции (VIEWS)
+            IconCard(
+                iconId = R.drawable.ic_outline_remove_red_eye_24,
+                text = viewsItem.count.toString(),  // берем полученный элемент(viewsItem), получаем количество(count) и приводим к типу стринг
+                onItemClickListener = {             // См.конспект 4.4, ближе к концу
+                    onItemClickListener(viewsItem)  // См.конспект 4.4, ближе к концу
+                }
+            )
         }
         Row(
             modifier = Modifier
-                .weight(1f), // если у двух элементов делать так - они займут одинаковое расстояние
-            horizontalArrangement = Arrangement.SpaceBetween // равномерное распределение элементов
+                .weight(1f), // Если у двух элементов делать так - они займут одинаковое расстояние
+            horizontalArrangement = Arrangement.SpaceBetween // Равномерное распределение элементов
         ) {
-            IconCard(iconId = R.drawable.ic_outline_reply_24, text = "7")
-            IconCard(iconId = R.drawable.ic_outline_mode_comment_24, text = "8")
-            IconCard(iconId = R.drawable.ic_baseline_favorite_border_24, text = "23")
-            // Icon(Icons.Default.Star,contentDescription = null) - так выбирается иконка из предустановленных
+            val sharesItem =
+                statistics.getItemByType(StatisticType.SHARES) // Все так же, как у элемента VIEWS
+            IconCard(
+                iconId = R.drawable.ic_outline_reply_24,
+                text = sharesItem.count.toString(),
+                onItemClickListener = {             // См.конспект 4.4, ближе к концу
+                    onItemClickListener(sharesItem)  // См.конспект 4.4, ближе к концу
+                }
+            )
+            val commentItem =
+                statistics.getItemByType(StatisticType.COMMENTS) // Все так же, как у элемента VIEWS
+            IconCard(
+                iconId = R.drawable.ic_outline_mode_comment_24,
+                text = commentItem.count.toString(),
+                onItemClickListener = {             // См.конспект 4.4, ближе к концу
+                    onItemClickListener(commentItem)  // См.конспект 4.4, ближе к концу
+                }
+            )
+            val likesItem =
+                statistics.getItemByType(StatisticType.LICKES) // Все так же, как у элемента VIEWS
+            IconCard(
+                iconId = R.drawable.ic_baseline_favorite_border_24,
+                text = likesItem.count.toString(),
+                onItemClickListener = {             // См.конспект 4.4, ближе к концу
+                    onItemClickListener(likesItem)  // См.конспект 4.4, ближе к концу
+                }
+            )
+            // Icon(Icons.Default.Star,contentDescription = null) - Так выбирается иконка из предустановленных
         }
     }
 }
 
+private fun List<StatisticItem>.getItemByType(type: StatisticType): StatisticItem {  // extension fun, принимает StatisticType и возвращает StatisticItem
+    return this.find { it.type == type }
+        ?: throw IllegalStateException()// здесь прохожу по всем элементам коллекции, ищу элемент, тип которого совпадает с принятым функцией
+}  // ищу элемент, тип которого совпадает с принятым функцией и добавляю элвис-оператор на случай, если объект нулевой, см.конспект
+// Теперь есть метод, который в коллекции statistics: List<StatisticItem> может найти объект по его типу
+
 @Composable
-private fun IconCard(   // функция для отображения иконки и текста, принимает...
+private fun IconCard(   // Функция для отображения иконки и текста, принимает...
     iconId: Int, // ...Id картинки и...
-    text: String// ...отображаемый текст
+    text: String,// ...отображаемый текст
+    onItemClickListener: () -> Unit  // Добавил слушатель (который здесь в Row), для пробрасывания наверх...
+    // ...далее в функции StatisticsCard у каждого элемента повешу слушатель клика
 ) {
-    Row (
+    Row(
+        modifier = Modifier.clickable { // Элемент clickable, при клике на элемент Row будет вызван данный метод
+            onItemClickListener() // Вызов проброшенного наверх слушателя
+        },
         verticalAlignment = Alignment.CenterVertically // каждый элемент в Row будет расположен по центру по вертикали
-            ){ // чтобы разместить рядом иконку с текстом
+    ) { // чтобы разместить рядом иконку с текстом
         Icon(
             painter = painterResource(id = iconId), // принимает iconId, строка 57
             contentDescription = "image3",
@@ -107,7 +167,9 @@ private fun IconCard(   // функция для отображения икон
 
 
 @Composable
-private fun OneCard() {
+private fun OneCard(
+    feedPost: FeedPost  // Принимает нужный параметр: feedPost
+) {
     Row(
         modifier = Modifier //добавляю атрибут modifier, чтобы установить размер
             .fillMaxWidth(), // сделал во всю ширину экрана
@@ -117,7 +179,7 @@ private fun OneCard() {
             modifier = Modifier // добавляю атрибут modifier, чтобы установить размеры и вид
                 .size(50.dp)
                 .clip(CircleShape),
-            painter = painterResource(id = R.drawable.icons_tt),
+            painter = painterResource(id = feedPost.avatarResId),  // Из feedPost принимает аватарку
             contentDescription = "image1"
         )
         Spacer( // Элемент Spacer - делает зазор, здесь - между Image и Column теперь 8dp
@@ -130,7 +192,7 @@ private fun OneCard() {
             // другими элементами, здесь так: занимает весь центр, прижав крайние элементы к краям
         ) {
             Text(
-                text = "Будет потом",
+                text = feedPost.communityName, // Из feedPost принимает название группы
                 color = MaterialTheme.colors.onPrimary
             )
             Spacer( // Здесь Элемент Spacer делает зазор между Text и Text - 4dp
@@ -138,7 +200,7 @@ private fun OneCard() {
                     .height(4.dp)
             )
             Text(
-                text = "14:00",
+                text = feedPost.publicationDate, // Из feedPost принимает дату публикации
                 color = MaterialTheme.colors.onSecondary
             )
         }
@@ -147,27 +209,6 @@ private fun OneCard() {
             contentDescription = "image2",
             tint = MaterialTheme.colors.onSecondary  // меняю цвет иконки
         )
-
-
     }
 }
 
-@Preview
-@Composable
-fun PreviewCardLight() {
-    VkNewsClientTheme(
-        darkTheme = false
-    ) {
-        PostCard()
-    }
-}
-
-@Preview
-@Composable
-fun PreviewCardDark() {
-    VkNewsClientTheme(
-        darkTheme = true
-    ) {
-        PostCard()
-    }
-}
