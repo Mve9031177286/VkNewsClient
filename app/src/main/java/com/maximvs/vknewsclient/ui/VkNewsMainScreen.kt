@@ -7,22 +7,25 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.maximvs.vknewsclient.MainViewModel
 import com.maximvs.vknewsclient.domain.FeedPost
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.N)
 @Composable
-fun MainScreen() {
+fun MainScreen(viewModel: MainViewModel) {  // Теперь в качестве параметра принимает viewModel, а именно - MainViewModel
 
-    val feedPost = remember {
-        mutableStateOf(FeedPost())
-    }
+    /* val feedPost = remember {       // Это все переписывается, т.к. теперь используется вьюмодель,
+           mutableStateOf(FeedPost())  //  и переносится туда, где используется - к PostCard
+    } */
+
     /*  // Три переменных для FAB и SnackBar, видео 3.4
     val snackbarHostState = remember {  // создаю State для SnackbarHost(hostState = )
         SnackbarHostState()
@@ -86,10 +89,34 @@ fun MainScreen() {
         }
 
     ) {
+        val feedPost = viewModel.feedPost.observeAsState(FeedPost()) // Перенес туда, где используется -
+        // конспект 4.5, добавил значение по умолчанию (FeedPost()), чтобы не обрабатывать возможный null
         PostCard(
             modifier = Modifier.padding(8.dp), //  В параметрах PostCard() при создании передан параметр modifier, поэтому могу его здесь использовать
             feedPost = feedPost.value,
-            onStatisticItemClickListener = { newItem ->  // Заменил название, для понимания
+
+            /* Этот onStatisticItemClickListener (который ниже) меняю на 4 других, 4.5, Блок Б
+            onStatisticItemClickListener = { // После перехода на вью-модель название параметра более не требуется
+                viewModel.updateCount(it) // После создания вью-модели вызываю ее здесь
+                }
+             */
+
+            onViewsClickListener = {
+                viewModel.updateCount(it)   // Вместо  onStatisticItemClickListener теперь 4 других,
+            },                              // каждый на свой тип, Конспект 4.5, Блок Б.
+            onLikeClickListener = {
+                viewModel.updateCount(it)
+            },
+            onShareClickListener = {
+                viewModel.updateCount(it)
+            },
+            onCommentClickListener = {
+                viewModel.updateCount(it)
+            }
+
+
+            // Все, что ниже - перенес во вью-модель, здесь уже не нужно
+                /*  { newItem ->  // Заменил название, для понимания
                 val oldStatistics = feedPost.value.statistics
                 val newStatistics = oldStatistics.toMutableList().apply {
                     replaceAll { oldItem ->           // См.конспект 4.4, ближе к концу. Полное описание - Блок А
@@ -101,7 +128,8 @@ fun MainScreen() {
                     }
                 }
                 feedPost.value = feedPost.value.copy(statistics = newStatistics)
-            }
-        )  // См.конспект 4.4, ближе к концу. Полное описание - Блок А
+                 // См.конспект 4.4, ближе к концу. Полное описание - Блок А
+                */
+        )
     }
 }

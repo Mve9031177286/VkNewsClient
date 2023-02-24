@@ -34,7 +34,13 @@ fun PostCard(
     modifier: Modifier = Modifier, // Чтобы можно было добавлять паддинг и пр. при вызове PostCard из вне и...
     feedPost: FeedPost,  // Вторым параметром принимает feedPost и из него можно взять статистику:
     // StatisticsCard(statistics = feedPost.statistics) - см.ниже
-    onStatisticItemClickListener: (StatisticItem) -> Unit  // См.конспект 4.4, ближе к концу
+    // onStatisticItemClickListener: (StatisticItem) -> Unit,  // См.конспект 4.4, ближе к концу.
+                        // Конспект 4.5 - удаляю onItemClickListener, добавляю 4 других, см.ниже.
+
+    onLikeClickListener: (StatisticItem) -> Unit,    // 4 ClickListener для отдельных действий
+    onShareClickListener: (StatisticItem) -> Unit,   // кликам на каждый элемент статистики,
+    onViewsClickListener: (StatisticItem) -> Unit,   // вместо onStatisticItemClickListener,
+    onCommentClickListener: (StatisticItem) -> Unit  // см.конспект 4.5, Блок Б
 ) {
     Card(
         modifier = modifier  //  ...здесь - тоже. См.конспект, 4.4
@@ -67,8 +73,13 @@ fun PostCard(
             )
             StatisticsCard(
                 statistics = feedPost.statistics,
-                onItemClickListener = onStatisticItemClickListener
-            ) // При вызове функции добавил слушатель, конспект 4.4, ближе к концу
+                onLikeClickListener = onLikeClickListener, // Передал 4 каллбэка, конспект 4.5, Блок Б
+                onCommentClickListener = onCommentClickListener,
+                onViewsClickListener = onViewsClickListener,
+                onShareClickListener = onShareClickListener
+
+                // onItemClickListener = onStatisticItemClickListener  // При вызове функции добавил слушатель, конспект 4.4, ближе к концу
+            )   // 4.5 - убрал onItemClickListener = onStatisticItemClickListener, добавил 4 других.
         }
     }
 }
@@ -76,7 +87,13 @@ fun PostCard(
 @Composable
 private fun StatisticsCard(  // функция для отображения нескольких fun IconCard, в качестве параметров принимает:
     statistics: List<StatisticItem>, // коллекцию элементов StatisticItem, назову statistics
-    onItemClickListener: (StatisticItem) -> Unit    // См.конспект 4.4, ближе к концу
+    //  onItemClickListener: (StatisticItem) -> Unit    // См.конспект 4.4, ближе к концу.
+                //  Конспект 4.5 - удаляю onItemClickListener, добавляю 4 других, см.ниже.
+
+    onLikeClickListener: (StatisticItem) -> Unit,    // 4 ClickListener для отдельных действий
+    onShareClickListener: (StatisticItem) -> Unit,   // кликам на каждый элемент статистики,
+    onViewsClickListener: (StatisticItem) -> Unit,   // вместо onStatisticItemClickListener,
+    onCommentClickListener: (StatisticItem) -> Unit  // см.конспект 4.5, Блок Б
 ) {
     Row() {
         Row(
@@ -89,7 +106,8 @@ private fun StatisticsCard(  // функция для отображения н�
                 iconId = R.drawable.ic_outline_remove_red_eye_24,
                 text = viewsItem.count.toString(),  // берем полученный элемент(viewsItem), получаем количество(count) и приводим к типу стринг
                 onItemClickListener = {             // См.конспект 4.4, ближе к концу
-                    onItemClickListener(viewsItem)  // См.конспект 4.4, ближе к концу
+                    onViewsClickListener(viewsItem)  // См.конспект 4.4, ближе к концу.
+                    // 4.5 - меняю onItemClickListener на onViewsItemClickListener
                 }
             )
         }
@@ -104,7 +122,8 @@ private fun StatisticsCard(  // функция для отображения н�
                 iconId = R.drawable.ic_outline_reply_24,
                 text = sharesItem.count.toString(),
                 onItemClickListener = {             // См.конспект 4.4, ближе к концу
-                    onItemClickListener(sharesItem)  // См.конспект 4.4, ближе к концу
+                    onShareClickListener(sharesItem)  // См.конспект 4.4, ближе к концу
+                    // 4.5 - меняю onItemClickListener на onShareItemClickListener
                 }
             )
             val commentItem =
@@ -113,7 +132,9 @@ private fun StatisticsCard(  // функция для отображения н�
                 iconId = R.drawable.ic_outline_mode_comment_24,
                 text = commentItem.count.toString(),
                 onItemClickListener = {             // См.конспект 4.4, ближе к концу
-                    onItemClickListener(commentItem)  // См.конспект 4.4, ближе к концу
+                    onCommentClickListener(commentItem)  // См.конспект 4.4, ближе к концу
+                    // 4.5 - меняю onItemClickListener на onCommentItemClickListener
+
                 }
             )
             val likesItem =
@@ -122,7 +143,8 @@ private fun StatisticsCard(  // функция для отображения н�
                 iconId = R.drawable.ic_baseline_favorite_border_24,
                 text = likesItem.count.toString(),
                 onItemClickListener = {             // См.конспект 4.4, ближе к концу
-                    onItemClickListener(likesItem)  // См.конспект 4.4, ближе к концу
+                    onLikeClickListener(likesItem)  // См.конспект 4.4, ближе к концу
+                    // 4.5 - меняю onItemClickListener на onLikeItemClickListener
                 }
             )
             // Icon(Icons.Default.Star,contentDescription = null) - Так выбирается иконка из предустановленных
