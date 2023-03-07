@@ -3,6 +3,7 @@ package com.maximvs.vknewsclient.domain
 import com.maximvs.vknewsclient.R
 
 data class FeedPost(
+    val id: Int = 0,
     val communityName: String = "Какая-то группа", // Присваиваю значения всем переменным, для тестирования, в будущем - будут из сети
     val publicationDate: String = "14:00",
     val avatarResId: Int = R.drawable.icons_tt,
